@@ -2,12 +2,21 @@ package mPA.utils;
 
 import org.apache.commons.lang3.time.StopWatch;
 
+
 import static java.lang.Thread.sleep;
 
 public class CommonUtil {
 
     public static StopWatch stopWatch = new StopWatch();
     
+    public static void startTimer() {
+    	stopWatch.start();
+    }
+    
+    public static void timeTaken() {
+    	stopWatch.stop();
+    	LoggerUtil.log("total time taken : " + stopWatch.getTime());
+    }
 
     public static void delay(long delayMilliSeconds)  {
         try{
