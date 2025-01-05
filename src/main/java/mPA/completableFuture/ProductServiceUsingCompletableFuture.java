@@ -109,10 +109,22 @@ public class ProductServiceUsingCompletableFuture {
     				//updaateInventory(productInfo);
     			});
     	
-    	CompletableFuture<Review> cfReviews 	 =CompletableFuture.supplyAsync(() ->reviewService.retrieveReviews(productId));
+    	CompletableFuture<Review> cfReviews 	 =CompletableFuture
+    			.supplyAsync(() ->reviewService.retrieveReviews(productId))
+    			.exceptionally((e) -> {
+    				 LoggerUtil.log("Handle the Exception in Ptoduct Sevice : " +e.getMessage());
+    				 return Review.builder().noOfReviews(0).overallRating(0).build();
+    			});
 
-    Product product=	cfProductInfo.thenCombine(cfReviews, (productInfo,review)-> new Product(productId, productInfo, review)).join();    	
-        CommonUtil.stopWatch.stop();
+    Product product=	cfProductInfo
+    		.thenCombine(cfReviews, (productInfo,review)-> new Product(productId, productInfo, review))
+    		.whenComplete((prod, ex) -> {
+    			 LoggerUtil.log("inside whenComplete "+prod +"and exception is "+ ex);
+    		} )
+    		.join();    	
+     
+    
+    CommonUtil.stopWatch.stop();
         LoggerUtil.log("Total Time Taken : "+ CommonUtil.stopWatch.getTime());
         return product;
     }
