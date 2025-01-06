@@ -1,6 +1,8 @@
 package mPA.completableFuture;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import mPA.utils.CommonUtil;
 import mPA.utils.LoggerUtil;
@@ -75,6 +77,66 @@ public class CompletableFutureHelloWorld {
   
      return hw;
     }
+    
+    public String helloworld_3_async_calls_custom_threadpool(){
+    	CommonUtil.startTimer();
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CompletableFuture<String> hello = CompletableFuture.supplyAsync(()->hws.hello(),executorService);
+        CompletableFuture<String> world = CompletableFuture.supplyAsync(()->hws.world(),executorService);
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(()->{
+        	CommonUtil.delay(1000);
+            return " Hi CompletableFuture!";
+        },executorService);
+
+        String hw= hello
+                .thenCombine(world, (h, w) -> {
+                	LoggerUtil.log("thenCombine h/w");
+                    return h+w;
+                }) // first, second
+                .thenCombine(hiCompletableFuture, (previous,current)->{
+                	LoggerUtil.log("thenCombine previous/current");
+                    return previous+current;
+                })
+                .thenApply(s -> {
+                	LoggerUtil.log("thenApply");
+                    return  s.toUpperCase();
+                })
+                .join();
+
+        CommonUtil.timeTaken();
+        return hw;
+    } 
+    
+    public String helloworld_3_async_calls_log_asynch(){
+    	CommonUtil.startTimer();
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        CompletableFuture<String> hello = CompletableFuture.supplyAsync(()->hws.hello(),executorService);
+        CompletableFuture<String> world = CompletableFuture.supplyAsync(()->hws.world(),executorService);
+        CompletableFuture<String> hiCompletableFuture =  CompletableFuture.supplyAsync(()->{
+        	CommonUtil.delay(1000);
+            return " Hi CompletableFuture!";
+        },executorService);
+
+        String hw= hello
+                .thenCombineAsync(world, (h, w) -> {
+                	LoggerUtil.log("thenCombine h/w");
+                    return h+w;
+                }) // first, second
+                .thenCombineAsync(hiCompletableFuture, (previous,current)->{
+                	LoggerUtil.log("thenCombine previous/current");
+                    return previous+current;
+                })
+                .thenApplyAsync(s -> {
+                	LoggerUtil.log("thenApply");
+                    return  s.toUpperCase();
+                })
+                .join();
+
+        CommonUtil.timeTaken();
+        return hw;
+    } 
     
     
     public CompletableFuture<String> helloWorld_thenCompose (){
